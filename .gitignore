@@ -1,2 +1,6 @@
 *.bak
+*.bck
+*.dcm
+*-bak
 *-cache.lib
+gerber/
