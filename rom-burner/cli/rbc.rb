@@ -39,9 +39,9 @@ def write_sector(serial, sector, data)
   end
 end
 
-def dump_rom(output_file, sectors)
-  print "Getting ROM image from device... \n"
-  SerialPort.open("COM3", SERIAL_BAUDRATE) { |serial|
+def dump_rom(serial_port, output_file, sectors)
+  print "Getting ROM image from device #{serial_port}... \n"
+  SerialPort.open(serial_port, SERIAL_BAUDRATE) { |serial|
     read_handshake(serial)
     File.open(output_file, "wb") { |file|
       for sector in sectors
@@ -55,9 +55,9 @@ def dump_rom(output_file, sectors)
   }
 end
 
-def erase_sectors(sectors)
-  print "Erasing ROM sectors from device... \n"
-  SerialPort.open("COM3", 9600) { |serial|
+def erase_sectors(serial_port, sectors)
+  print "Erasing ROM sectors from device #{serial_port}... \n"
+  SerialPort.open("COM3", SERIAL_BAUDRATE) { |serial|
     read_handshake(serial)
     for sector in sectors
       sector_addr = sector << 12
@@ -72,9 +72,9 @@ def erase_sectors(sectors)
   }
 end
 
-def burn_rom(input_file, initial_sector)
-  print "Burning ROM image to device... \n"
-  SerialPort.open("COM3", 9600) { |serial|
+def burn_rom(serial_port, input_file, initial_sector)
+  print "Burning ROM image to device #{serial_port}... \n"
+  SerialPort.open(serial_port, SERIAL_BAUDRATE) { |serial|
     read_handshake(serial)
     File.open(input_file, "rb") { |file|
       sector = initial_sector
@@ -96,11 +96,12 @@ end
 
 def report_error(error)
   abort "Error: #{error}\n" +
-    "Usage: rbc dump <output file> [<initial sector>] [<sector count>]\n" +
-    "       rbc erase [<initial sector>] [<sector count>]\n" +
-    "       rbc burn <input file> [<initial sector>]\n" + 
+    "Usage: rbc dump  <serial port> <output file> [<initial sector>] [<sector count>]\n" +
+    "       rbc erase <serial port> [<initial sector>] [<sector count>]\n" +
+    "       rbc burn  <serial port> <input file> [<initial sector>]\n" + 
     "\n" +
     "Parameters:\n" +
+    "   <serial port>     The serial port where Arduino is connected to\n" +
     "   <input file>      The file where burned data would be read from\n" +
     "   <output file>     The file where dumped data would be stored\n" +
     "   <initial sector>  The first sector the operation would be applied.\n" +
@@ -125,22 +126,23 @@ def get_arg_in_range(i, range, default=nil)
 end
 
 action = get_arg(0)
+port = get_arg(1)
 
 if action == 'dump'
-  output_file = get_arg(1)
+  output_file = get_arg(2)
+  initial_sector = get_arg_in_range(3, 0..MAX_SECTORS - 1, 0)
+  left = MAX_SECTORS - initial_sector
+  sector_count = get_arg_in_range(4, 1..left, left)
+  dump_rom(port, output_file, initial_sector..(initial_sector + sector_count - 1))
+elsif action == 'erase'
   initial_sector = get_arg_in_range(2, 0..MAX_SECTORS - 1, 0)
   left = MAX_SECTORS - initial_sector
   sector_count = get_arg_in_range(3, 1..left, left)
-  dump_rom(output_file, initial_sector..(initial_sector + sector_count - 1))
-elsif action == 'erase'
-  initial_sector = get_arg_in_range(1, 0..MAX_SECTORS - 1, 0)
-  left = MAX_SECTORS - initial_sector
-  sector_count = get_arg_in_range(2, 1..left, left)
-  erase_sectors(initial_sector..(initial_sector + sector_count - 1))
+  erase_sectors(port, initial_sector..(initial_sector + sector_count - 1))
 elsif action == 'burn'
-  input_file = get_arg(1)
-  initial_sector = get_arg_in_range(2, 0..MAX_SECTORS - 1, 0)
-  burn_rom(input_file, initial_sector)
+  input_file = get_arg(2)
+  initial_sector = get_arg_in_range(3, 0..MAX_SECTORS - 1, 0)
+  burn_rom(port, input_file, initial_sector)
 else
   abort "Error: unknown action '#{action}'"
 end
