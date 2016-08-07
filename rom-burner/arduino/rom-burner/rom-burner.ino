@@ -8,6 +8,8 @@
 #define PIN_WE            9
 #define PIN_OE            10
 #define PIN_ADDR16        11
+#define PIN_ADDR17        12
+#define PIN_ADDR18        13
 
 #define SECTOR_SIZE       4096
 
@@ -22,6 +24,8 @@ void put_addr(unsigned long addr) {
   shiftOut(PIN_ADDR_OUT, PIN_CLOCK, MSBFIRST, (byte) (addr >> 8));
   shiftOut(PIN_ADDR_OUT, PIN_CLOCK, MSBFIRST, (byte) addr);
   digitalWrite(PIN_ADDR16, bitRead(addr, 16));
+  digitalWrite(PIN_ADDR17, bitRead(addr, 17));
+  digitalWrite(PIN_ADDR18, bitRead(addr, 18));
   digitalWrite(PIN_ADDR_LATCH, HIGH);
 }
 
@@ -164,6 +168,8 @@ void setup() {
   pinMode(PIN_WE, OUTPUT);
   pinMode(PIN_OE, OUTPUT);
   pinMode(PIN_ADDR16, OUTPUT);
+  pinMode(PIN_ADDR17, OUTPUT);
+  pinMode(PIN_ADDR18, OUTPUT);
   
   digitalWrite(PIN_ADDR_LATCH, LOW);
   digitalWrite(PIN_DATA_LATCH, LOW);
