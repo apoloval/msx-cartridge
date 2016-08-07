@@ -2,6 +2,7 @@
 require "serialport"
 
 MAX_SECTORS = 128
+SERIAL_BAUDRATE = 2000000
 
 def read_handshake(serial)
   print "\tReceiving handshake from device... "
@@ -40,7 +41,7 @@ end
 
 def dump_rom(output_file, sectors)
   print "Getting ROM image from device... \n"
-  SerialPort.open("COM3", 9600) { |serial|
+  SerialPort.open("COM3", SERIAL_BAUDRATE) { |serial|
     read_handshake(serial)
     File.open(output_file, "wb") { |file|
       for sector in sectors
