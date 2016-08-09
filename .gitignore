@@ -3,4 +3,5 @@
 *.dcm
 *-bak
 *-cache.lib
+*.net
 gerber/
