@@ -17,7 +17,7 @@
 #define COMMAND_ERASE     1
 #define COMMAND_WRITE     2
 
-#define SERIAL_BAUDRATE 2000000
+#define SERIAL_BAUDRATE 921600
 
 /** Put the given address in the bus through shift out registers. */
 void put_addr(unsigned long addr) {

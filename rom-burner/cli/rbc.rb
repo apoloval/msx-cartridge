@@ -2,7 +2,7 @@
 require "serialport"
 
 MAX_SECTORS = 128
-SERIAL_BAUDRATE = 2000000
+SERIAL_BAUDRATE = 921600
 
 def read_handshake(serial)
   print "\tReceiving handshake from device... "
