@@ -57,7 +57,7 @@ end
 
 def erase_sectors(serial_port, sectors)
   print "Erasing ROM sectors from device #{serial_port}... \n"
-  SerialPort.open("COM3", SERIAL_BAUDRATE) { |serial|
+  SerialPort.open(serial_port, SERIAL_BAUDRATE) { |serial|
     read_handshake(serial)
     for sector in sectors
       sector_addr = sector << 12
