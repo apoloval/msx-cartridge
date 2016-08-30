@@ -1,4 +1,4 @@
-update=07/08/2016 12:08:19
+update=2016/08/25 16:26:59
 version=1
 last_client=kicad
 [pcbnew]
@@ -27,7 +27,7 @@ NetIExt=net
 version=1
 [eeschema]
 version=1
-LibDir=../libraries
+LibDir=../../libraries;../pcb
 [eeschema/libraries]
 LibName1=power
 LibName2=device
@@ -59,3 +59,4 @@ LibName27=atmel
 LibName28=contrib
 LibName29=valves
 LibName30=arduino
+LibName31=rom-burner
