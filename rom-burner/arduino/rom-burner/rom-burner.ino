@@ -40,11 +40,20 @@ void put_data(byte data) {
   digitalWrite(PIN_DATA_LATCH, HIGH);
 }
 
+/** Get data from the data bus. */
+byte get_data() {
+  digitalWrite(PIN_OE, LOW);
+  digitalWrite(PIN_CLOCK, HIGH);
+  digitalWrite(PIN_DATA_LATCH, HIGH);
+  digitalWrite(PIN_DATA_LATCH, LOW);
+  digitalWrite(PIN_OE, HIGH);
+  return shiftIn(PIN_DATA_IN, PIN_CLOCK, MSBFIRST);
+}
+
 /** Send a command to the ROM device. */
 void send_cmd_seq(unsigned long* addr, byte* data, unsigned len) {
   digitalWrite(PIN_DATA_READ, LOW);
   digitalWrite(PIN_OE, HIGH);
-  digitalWrite(PIN_WE, HIGH);
   for (int i = 0; i < len; i++) {
     put_addr(addr[i]);
     digitalWrite(PIN_WE, LOW);
@@ -57,22 +66,16 @@ void send_cmd_seq(unsigned long* addr, byte* data, unsigned len) {
 /** Read the content of given ROM device address. */
 byte read_addr(unsigned long addr) {
   put_addr(addr);
+  return get_data();
+}
 
-  // Request the chip to read
-  digitalWrite(PIN_OE, LOW);
-  digitalWrite(PIN_WE, HIGH);
-
-  // Wait for data to be read
-  delayMicroseconds(1);
-
-  // Load data bus through shift in register
-  digitalWrite(PIN_CLOCK, HIGH);
-  digitalWrite(PIN_DATA_LATCH, HIGH);
-  delayMicroseconds(1);
-  digitalWrite(PIN_DATA_LATCH, LOW);
-  delayMicroseconds(1);
-  digitalWrite(PIN_OE, HIGH);
-  return shiftIn(PIN_DATA_IN, PIN_CLOCK, MSBFIRST);
+/** Wait for write/erase operation using data polling method. */
+void wait_datapolling(byte data) {
+  for (;;) {
+    byte recv = get_data();
+    if ((recv & 0x80) == (data & 0x80))
+      return;
+  }
 }
 
 /**
@@ -83,7 +86,7 @@ void write_addr(unsigned long addr, byte data) {
   unsigned long addr_seq[] = { 0x5555, 0x2aaa, 0x5555, addr };
   byte data_seq[] = { 0xaa, 0x55, 0xa0, data };
   send_cmd_seq(addr_seq, data_seq, 4);
-  delayMicroseconds(30);
+  wait_datapolling(data);
 }
 
 /**
