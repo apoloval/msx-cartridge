@@ -82,7 +82,7 @@ void write_addr(unsigned long addr, byte data) {
   unsigned long addr_seq[] = { 0x5555, 0x2aaa, 0x5555, addr };
   byte data_seq[] = { 0xaa, 0x55, 0xa0, data };
   send_cmd_seq(addr_seq, data_seq, 4);
-  delay(1);
+  delayMicroseconds(30);
 }
 
 /**
