@@ -16,6 +16,7 @@
 #define COMMAND_READ      0
 #define COMMAND_ERASE     1
 #define COMMAND_WRITE     2
+#define COMMAND_ERASEALL  3
 
 #define SERIAL_BAUDRATE 921600
 
@@ -56,14 +57,14 @@ void send_cmd_seq(unsigned long* addr, byte* data, unsigned len) {
 /** Read the content of given ROM device address. */
 byte read_addr(unsigned long addr) {
   put_addr(addr);
-  
+
   // Request the chip to read
   digitalWrite(PIN_OE, LOW);
   digitalWrite(PIN_WE, HIGH);
-  
+
   // Wait for data to be read
   delayMicroseconds(1);
-  
+
   // Load data bus through shift in register
   digitalWrite(PIN_CLOCK, HIGH);
   digitalWrite(PIN_DATA_LATCH, HIGH);
@@ -95,20 +96,29 @@ int blank_test(byte sector) {
   for (int i = 0; i < SECTOR_SIZE; i++) {
     unsigned long addr = sector_addr + i;
     byte actual = read_addr(addr);
-    if (actual != 0xff) {      
+    if (actual != 0xff) {
       result++;
     }
   }
   return result;
 }
 
+/** Erase the whole memory. */
+int erase_all() {
+  unsigned long addr_seq[] = { 0x5555, 0x2aaa, 0x5555, 0x5555, 0x2aaa, 0x5555 };
+  byte data_seq[] = { 0xaa, 0x55, 0x80, 0xaa, 0x55, 0x10 };
+  send_cmd_seq(addr_seq, data_seq, 6);
+  delay(500);
+  return blank_test(0);
+}
+
 /** Erase the given sector. */
-int erase_sector(byte sector) {  
+int erase_sector(byte sector) {
   unsigned long sector_addr = ((unsigned long) sector) << 12;
   unsigned long addr_seq[] = { 0x5555, 0x2aaa, 0x5555, 0x5555, 0x2aaa, sector_addr };
   byte data_seq[] = { 0xaa, 0x55, 0x80, 0xaa, 0x55, 0x30 };
   send_cmd_seq(addr_seq, data_seq, 6);
-  delay(30);
+  delay(20);
   return blank_test(sector);
 }
 
@@ -134,6 +144,11 @@ void process_erase_command() {
   Serial.write(erase_sector(sector));
 }
 
+/** Process a incoming erase command from serial. */
+void process_eraseall_command() {
+  Serial.write(erase_all());
+}
+
 /** Process a incoming write command from serial. */
 void process_write_command() {
   unsigned long sector_addr = ((unsigned long) serial_read_byte()) << 12;
@@ -156,6 +171,10 @@ void process_command() {
       break;
     case COMMAND_WRITE:
       process_write_command();
+      break;
+    case COMMAND_ERASEALL:
+      process_eraseall_command();
+      break;
   }
 }
 
@@ -172,7 +191,7 @@ void setup() {
   pinMode(PIN_ADDR16, OUTPUT);
   pinMode(PIN_ADDR17, OUTPUT);
   pinMode(PIN_ADDR18, OUTPUT);
-  
+
   digitalWrite(PIN_ADDR_LATCH, LOW);
   digitalWrite(PIN_DATA_LATCH, LOW);
   digitalWrite(PIN_DATA_READ, HIGH);
