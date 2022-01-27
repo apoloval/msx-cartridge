@@ -1,6 +1,7 @@
 *.bak
 *.bck
 *.dcm
+*-backups
 *-bak
 *-cache.lib
 *.net
