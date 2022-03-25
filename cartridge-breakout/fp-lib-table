@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name dips-s)(type Legacy)(uri $KIPRJMOD\..\libraries\dips-s.mod)(options "")(descr ""))
+  (lib (name msx)(type KiCad)(uri $KIPRJMOD\..\libraries\msx.pretty)(options "")(descr ""))
+)
