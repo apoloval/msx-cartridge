@@ -1,4 +1,4 @@
 (sym_lib_table
-  (lib (name arduino)(type Legacy)(uri /Users/apoloval/Development/Repositories/apoloval/msx-cartridge/libraries/arduino.lib)(options "")(descr ""))
-  (lib (name rom-burner)(type Legacy)(uri ${KIPRJMOD}/rom-burner.lib)(options "")(descr ""))
+  (lib (name "arduino")(type "Legacy")(uri "${KIPRJMOD}/../../libraries/arduino.lib")(options "")(descr ""))
+  (lib (name "rom-burner")(type "Legacy")(uri "${KIPRJMOD}/rom-burner.lib")(options "")(descr ""))
 )
